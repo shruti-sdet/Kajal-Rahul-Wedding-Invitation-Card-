@@ -1061,60 +1061,23 @@ const RSVP_SHEET_URL = "https://script.google.com/macros/s/AKfycbxPevIl2h4xsGZJr
 // If neither is set, Send RSVP opens WhatsApp on the guest's phone instead.
 const RSVP_APIKEY = "";
 
-/* ---------- Background music (generated live, no files) ---------- */
-let ctx, master, playing = false, timer;
-const SA = 261.63; // C4
-const scale = [0,2,4,6,7,9,11,12,14,16]; // Raag Yaman flavour
-const hz = s => SA * Math.pow(2, s/12);
-function buildAudio(){
-  ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
-  master = ctx.createGain(); master.gain.value = 0;
-  // simple reverb
-  const len = ctx.sampleRate * 2.8, ir = ctx.createBuffer(2, len, ctx.sampleRate);
-  for (let c=0;c<2;c++){ const d=ir.getChannelData(c); for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.6); }
-  const verb = ctx.createConvolver(); verb.buffer = ir;
-  const wet = ctx.createGain(); wet.gain.value = .45;
-  master.connect(ctx.destination); master.connect(verb); verb.connect(wet); wet.connect(ctx.destination);
-  // tanpura-like drone: Pa, Sa, Sa, low Sa
-  [[hz(-5)/2,.05],[SA/2,.06],[SA/2*1.002,.05],[SA/4,.05]].forEach(([f,g],i)=>{
-    const o = ctx.createOscillator(), gn = ctx.createGain(), lfo = ctx.createOscillator(), lg = ctx.createGain();
-    o.type = 'sawtooth'; o.frequency.value = f;
-    const lp = ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value = 700;
-    lfo.frequency.value = .12 + i*.07; lg.gain.value = g*.6; lfo.connect(lg); lg.connect(gn.gain);
-    gn.gain.value = g; o.connect(lp); lp.connect(gn); gn.connect(master); o.start(); lfo.start();
-  });
-}
-let idx = 4;
-function pluck(){
-  const t = ctx.currentTime;
-  idx = Math.max(0, Math.min(scale.length-1, idx + [-2,-1,-1,1,1,2,0][Math.floor(Math.random()*7)]));
-  const f = hz(scale[idx]);
-  [1,2,3].forEach((h,k)=>{
-    const o = ctx.createOscillator(), g = ctx.createGain();
-    o.type = k ? 'sine' : 'triangle'; o.frequency.value = f*h;
-    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(.16/(h*h),t+.015);
-    g.gain.exponentialRampToValueAtTime(0.0001,t+2.4/h);
-    o.connect(g); g.connect(master); o.start(t); o.stop(t+2.6);
-  });
-  const gaps=[.55,.55,.55,1.1,.82];
-  timer = setTimeout(pluck, gaps[Math.floor(Math.random()*gaps.length)]*1000 + (Math.random()<.12?1100:0));
-}
+/* ---------- Background music: Kudmayi (music.mp3, loops) ---------- */
+const song = new Audio("music.mp3");
+song.loop = true; song.preload = "auto";
+let playing = false, fadeT;
+// iOS ignores .volume (always full), elsewhere fade in gently
+function fadeTo(v){ clearInterval(fadeT); fadeT = setInterval(() => { const d = v - song.volume; if (Math.abs(d) < .05) { song.volume = v; clearInterval(fadeT); } else song.volume += d > 0 ? .05 : -.05; }, 80); }
 function startMusic(){
-  if(!master) buildAudio();
-  ctx.resume();
-  master.gain.cancelScheduledValues(ctx.currentTime);
-  master.gain.setTargetAtTime(.55, ctx.currentTime, 1.2);
-  clearTimeout(timer); pluck(); playing = true; setBtn();
+  song.volume = 0; fadeTo(.8);
+  const p = song.play(); playing = true; setBtn();
+  if (p && p.catch) p.catch(() => { playing = false; setBtn(); });
 }
-function stopMusic(){
-  if(!master) return;
-  master.gain.setTargetAtTime(0, ctx.currentTime, .3);
-  clearTimeout(timer); playing = false; setBtn();
-}
+function stopMusic(){ song.pause(); playing = false; setBtn(); }
 const mbtn = document.getElementById('music');
 function setBtn(){ mbtn.classList.toggle('on', playing); mbtn.setAttribute('aria-pressed', playing); mbtn.setAttribute('aria-label', playing ? 'Pause music' : 'Play music'); }
 mbtn.onclick = () => playing ? stopMusic() : startMusic();
-document.addEventListener('visibilitychange', () => { if(!ctx) return; document.hidden ? ctx.suspend() : (playing && ctx.resume()); });
+// pause while the guest is in another app/tab, carry on when they come back
+document.addEventListener('visibilitychange', () => { if (document.hidden) song.pause(); else if (playing) song.play().catch(() => {}); });
 
 /* ---------- Envelope ---------- */
 const intro = document.getElementById('intro');
@@ -1138,17 +1101,16 @@ function enterSite(){
 }
 document.getElementById('seal').addEventListener('click', () => {
   if (opened) return; opened = true;
-  // unlock audio inside the tap
-  try { ctx = new (window.AudioContext || window.webkitAudioContext)(); ctx.resume(); } catch(e) {}
+  // start the song inside the tap itself so phones allow it to play
+  try { startMusic(); } catch(e) {}
   // 1) seal cracks + flap lifts
   requestAnimationFrame(() => intro.classList.add('open'));
   // 2) the card slides out of the envelope
   setTimeout(() => {
     intro.classList.add('cardup');
     const card = document.getElementById('envCard'); card.tabIndex = 0;
-    try { startMusic(); } catch(e) {}
   }, reduceMotion ? 0 : 650);
-  // 3) after 30 seconds move on to the home page (or earlier if the guest taps)
+  // 3) after 2 seconds move on to the home page (or earlier if the guest taps)
   let left = 2; const cnt = document.getElementById('enterCount');
   tickT = setInterval(() => { left--; cnt.textContent = 'Opening in ' + Math.max(left, 0) + 's'; }, 1000);
   autoT = setTimeout(enterSite, 2000);
