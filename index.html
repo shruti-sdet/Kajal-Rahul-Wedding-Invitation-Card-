@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -17,6 +17,8 @@
 <meta property="og:image:alt" content="Wedding invitation envelope for Kajal and Rahul with a gold KR seal">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#FEEEF3">
+<!-- the design is light-only: stop phones from auto-darkening it -->
+<meta name="color-scheme" content="light only">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Pinyon+Script&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
@@ -294,7 +296,7 @@ footer h2{font-size:clamp(2rem,8vw,3.2rem);letter-spacing:.05em;margin:.4rem 0}
 .dark{--bg:#6A1338;--bg2:#6A1338;--ink:#FDEAF0;--soft:#F7C1D2;--accent:#F5B4C9;--gold:#E97FA4;
   --blush:#8D1C4A;--lav:#8C1C49;--peach:#AA2659;--sage:#A42456;--card:rgba(255,255,255,.08);--line:rgba(249,201,216,.35);
   background:var(--bg);color:var(--ink)}
-@media (prefers-color-scheme:dark){.dark{--bg:#520F2C;--bg2:#520F2C}}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .dark{--bg:#520F2C;--bg2:#520F2C}}
 .dark .wash{opacity:.5}
 .dark .btn.solid{color:#6A1338}
 
@@ -367,7 +369,7 @@ body.opened .hero .wrap > :nth-child(9){animation-delay:1.1s}
   --blush:#7A1640;--lav:#5E1233;--peach:#8E1F4C;--sage:#5A1230;--card:rgba(255,255,255,.06);--line:rgba(249,201,216,.25)}
 .dark{--bg:#6E1438;--bg2:#6E1438;--ink:#FFF0F5;--soft:#F7C3D4;--accent:#FFD3E1;--gold:#F49AB8;
   --blush:#8E1F4C;--lav:#A3275A;--peach:#7E1843;--sage:#952255;--card:rgba(255,255,255,.08);--line:rgba(255,211,225,.3)}
-@media (prefers-color-scheme:dark){.dark{--bg:#2A0716;--bg2:#2A0716}}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .dark{--bg:#2A0716;--bg2:#2A0716}}
 .dark .btn.solid{color:#6E1438}
 .ev.done:hover{box-shadow:0 18px 40px rgba(194,46,102,.18)}
 /* ===== Photo art in event cards ===== */
@@ -423,7 +425,7 @@ body{background:#F3EBE4}
 #events,#rsvp{background:transparent!important}
 .sec .wash,.sec .floral,footer .wash{display:none}
 .dark{background:color-mix(in srgb,var(--bg) 84%,transparent)}
-@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--card:rgba(255,255,255,.82)}}
+:root:not([data-theme="dark"]){--card:rgba(255,255,255,.82)}
 .ev,.vcard,.travel div,.rsvp-card,.countdown div,.scratch{box-shadow:0 10px 30px rgba(194,46,102,.08)}
 .hero h1,.hero .getting,.hero .together{text-shadow:0 0 18px color-mix(in srgb,var(--bg) 90%,transparent)}
 #families .fam{display:grid;grid-template-columns:1fr 1fr;align-items:start;max-width:40rem;margin:0 auto}
