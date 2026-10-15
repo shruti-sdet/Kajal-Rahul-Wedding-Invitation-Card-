@@ -27,4 +27,4 @@ Double-click `index.html`, or serve the folder:
 
 ## Sections
 Start page (seal → card → doors) · Home (monogram, scratch card, countdown) · Our Families ·
-Our Story (5 photos) · Schedule of Events · Venue · RSVP (with thank-you card) · Footer.
+Our Story (6 photos) · Schedule of Events · Venue · RSVP (with thank-you card) · Footer.
